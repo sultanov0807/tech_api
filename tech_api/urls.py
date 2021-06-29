@@ -13,19 +13,32 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
-from main.views import CategoryListView
+from main.views import CategoryListView, PostsViewSet, PImageView
 
 router = DefaultRouter()
-router.register('')
-
-
+router.register('posts', PostsViewSet)
+# как работает
+"""
+create -> v1/api/posts/ POST
+list -> posts/ GET
+retrieve -> posts/id/ GET - один конкртеный пост
+updaate -> posts/id/ PUT
+partial_update -> posts/id/ PATCH
+destroy -> posts/id/DELETE
+"""
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls')),
     path('v1/api/categories/', CategoryListView.as_view()),
-]
+    path('v1/api/', include(router.urls)),
+    path('v1/api/add-image/', PImageView.as_view()),
+    path('v1/api/', include('account.urls')),
+
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
