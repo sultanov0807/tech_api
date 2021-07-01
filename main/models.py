@@ -1,3 +1,4 @@
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
 # Create your models here.
@@ -26,3 +27,22 @@ class Post(models.Model):
 class PImage(models.Model):
     image = models.ImageField(upload_to='posts', blank=True, null=True)
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='image')
+
+
+class Like(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE,
+                             related_name='likes')
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    is_liked = models.BooleanField(default=False)
+
+class Comment(models.Model):
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
+    text = models.TextField()
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+class Rating(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='rating')
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='rating')
+    is_rating = models.SmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])

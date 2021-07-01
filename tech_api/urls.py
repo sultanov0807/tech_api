@@ -19,10 +19,11 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
-from main.views import CategoryListView, PostsViewSet, PImageView
+from main.views import *
 
 router = DefaultRouter()
 router.register('posts', PostsViewSet)
+router.register('comments', CommentViewSet)
 # как работает
 """
 create -> v1/api/posts/ POST
