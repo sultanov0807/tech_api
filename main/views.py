@@ -4,6 +4,7 @@ from django.db.models import Q
 from django.utils import timezone
 from rest_framework import generics, viewsets, status, mixins
 from rest_framework.decorators import action
+from rest_framework.generics import RetrieveUpdateDestroyAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
@@ -27,7 +28,7 @@ class PostsViewSet(viewsets.ModelViewSet):  #CRAD
         return {'request': self.request}
 
     def get_permissions(self): #любой аутентифицированный пользователь мог смотреть посты
-        if self.action in ['update', 'partial_update', 'destroy']:
+        if self.action in ['update', 'partial_update', 'destroy', 'create']:
             permissions = [IsPostAuthor, ]
         elif self.action in ['comment', 'like']:
             permissions = [IsAuthenticated, ]
@@ -105,6 +106,8 @@ class PImageView(generics.ListCreateAPIView): #листинк картинки
 
     def get_serializer_context(self):
         return {'request': self.request}
+
+
 
 
 class CommentViewSet(mixins.CreateModelMixin,

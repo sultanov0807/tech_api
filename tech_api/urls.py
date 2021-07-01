@@ -18,12 +18,25 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
 
 from main.views import *
 
 router = DefaultRouter()
 router.register('posts', PostsViewSet)
 router.register('comments', CommentViewSet)
+
+schem_view = get_schema_view(
+    openapi.Info(
+        title = 'My API',
+        default_version='v1',
+        description='My ecommerce API'
+    ),
+    public=True,
+    permission_classes=[AllowAny],
+)
+
 # как работает
 """
 create -> v1/api/posts/ POST
@@ -41,5 +54,6 @@ urlpatterns = [
     path('v1/api/', include(router.urls)),
     path('v1/api/add-image/', PImageView.as_view()),
     path('v1/api/', include('account.urls')),
+    path('v1/api/docs/', schem_view.with_ui('swagger'))
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

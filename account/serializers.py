@@ -14,7 +14,7 @@ class RegSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('email', 'password', 'password_confirm', 'first_name', 'last_name')
+        fields = ('email', 'password', 'password_confirm')
 
     def validate_email(self, email):
         if User.objects.filter(email=email).exists():
@@ -31,7 +31,7 @@ class RegSerializer(serializers.ModelSerializer):
     def create(self, validated_data): #создаем
         user = User.objects.create(**validated_data)
         user.create_activation_code()
-        User.send_activation_mail(user.email, user.activation_code)  #send_activation указали в моделях @staticmethod
+        User.send_activation_mail(user.email, user.activation_code)
         return User
 
 

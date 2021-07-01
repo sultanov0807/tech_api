@@ -31,7 +31,7 @@ class PostSerializer(serializers.ModelSerializer):
     def get_like(self, instance):
         total_like = sum(instance.likes.values_list('is_liked', flat=True))
         like = total_like if total_like > 0 else 0
-        return round(like, 1)
+        return round(like, 1) #округляем
 
     def to_representation(self, instance): #переопределяем в каком виде возвращется респонс
         rep = super().to_representation(instance)
@@ -76,7 +76,7 @@ class PImageSerializer(serializers.ModelSerializer):
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
-        fields = "__all__"
+        fields = '__all__'
 
     def validate(self, attrs):
         request = self.context.get('request')
@@ -105,13 +105,3 @@ class RatingSerializer(serializers.ModelSerializer):
         attrs['user'] = request.user
         return attrs
 
-
-# class LikeSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Like
-#         fields = 'all'
-#
-#     def to_representation(self, instance):
-#         representation = super().to_representation(instance)
-#         representation['author'] = LikeSerializer(instance.author).data
-#         return representation
