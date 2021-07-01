@@ -31,8 +31,8 @@ class PImage(models.Model):
 
 class Like(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE,
-                             related_name='likes')
-    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+                             related_name='like')
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='likes')
     is_liked = models.BooleanField(default=False)
 
 class Comment(models.Model):
@@ -44,5 +44,5 @@ class Comment(models.Model):
 
 class Rating(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='rating')
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='rating')
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='ratings')
     is_rating = models.SmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])

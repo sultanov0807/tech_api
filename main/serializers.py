@@ -6,7 +6,7 @@ from .models import *
 class CategorySerializer(serializers.ModelSerializer): #ModelSerializers используем
     class Meta:
         model = Category
-        fields = '__all__'
+        fields = ('name', )
 
 
 class PostListSerializer(serializers.ModelSerializer):
@@ -23,16 +23,15 @@ class PostSerializer(serializers.ModelSerializer):
         fields = ('id', 'title', 'category', 'created', 'text')
 
     def get_rating(self, instance):
-        total_rating = sum(instance.reviews.values_list('rating', flat=True))
-        reviews_count = instance.reviews.count()
-        rating = total_rating / reviews_count if reviews_count > 0 else 0
+        total_rating = sum(instance.ratings.values_list('is_rating', flat=True))
+        ratings_count = instance.ratings.count()
+        rating = total_rating / ratings_count if ratings_count > 0 else 0
         return round(rating, 1)
 
-    # def get_like(self, instance):
-    #     total_like = sum(instance.reviews.values_list('likes', flat=True))
-    #     reviews_count = instance.reviews.count()
-    #     likes = total_like if reviews_count > 0 else 0
-    #     return round(likes, 1)
+    def get_like(self, instance):
+        total_like = sum(instance.likes.values_list('is_liked', flat=True))
+        like = total_like if total_like > 0 else 0
+        return round(like, 1)
 
     def to_representation(self, instance): #переопределяем в каком виде возвращется респонс
         rep = super().to_representation(instance)
@@ -40,8 +39,8 @@ class PostSerializer(serializers.ModelSerializer):
         rep['category'] = CategorySerializer(instance.category).data
         rep['comments'] = CommentSerializer(instance.comments.all(), many=True).data
         rep['images'] = PImageSerializer(instance.image.all(), many=True, context=self.context).data
-        rep['rating'] = RatingSerializer(instance.rating.all(), many=True).data
-        # rep['likes'] = self.get_like(instance)
+        rep['ratings'] = self.get_rating(instance)
+        rep['likes'] = self.get_like(instance)
 
         return rep
 
@@ -88,7 +87,13 @@ class CommentSerializer(serializers.ModelSerializer):
 class RatingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rating
-        fields = "__all__"
+        exclude = ('id', 'user')
+
+    def validate_post(self, post):
+        request = self.context.get('request')
+        if post.ratings.filter(user=request.user).exists():
+            raise serializers.ValidationError('Вы не можете добавить несколько рейтингов')
+        return post
 
     def validate_rating(self, rating):
         if not rating in range(1, 6):
@@ -97,5 +102,16 @@ class RatingSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         request = self.context.get('request')
-        attrs['author'] = request.user
+        attrs['user'] = request.user
         return attrs
+
+
+# class LikeSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Like
+#         fields = 'all'
+#
+#     def to_representation(self, instance):
+#         representation = super().to_representation(instance)
+#         representation['author'] = LikeSerializer(instance.author).data
+#         return representation

@@ -1,12 +1,14 @@
 
 from django.contrib.auth import get_user_model, authenticate
+from django.core.mail import send_mail
+from django.utils.crypto import get_random_string
 from rest_framework import serializers
 
 
 User = get_user_model()
 
 
-class RegisterSerializer(serializers.ModelSerializer):
+class RegSerializer(serializers.ModelSerializer):
     password = serializers.CharField(min_length=6, required=True)
     password_confirm = serializers.CharField(max_length=6, required=True)
 
@@ -33,7 +35,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         return User
 
 
-class ActivationSerializer(serializers.Serializer):
+class ActSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
     activation_code = serializers.CharField(required=True)
 
@@ -53,7 +55,7 @@ class ActivationSerializer(serializers.Serializer):
         user.save()
 
 
-class LoginSerializer(serializers.Serializer):
+class LogSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
     password = serializers.CharField(required=True)
 
@@ -69,3 +71,28 @@ class LoginSerializer(serializers.Serializer):
             raise serializers.ValidationError('Email и пароль обязателен')
         attrs['user'] = user
         return attrs
+
+
+#востановаление
+
+class RestPassSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+
+    def validate_email(self, email):
+        if not User.objects.filter(email=email).exists():
+            raise serializers.ValidationError()
+        return email
+
+    def send_message(self):
+        email = self.validated_data.get('email')
+        new_pass = get_random_string(length=8)
+        user = User.objects.get(email=email)
+        user.set_password(new_pass)
+        user.save()
+        message = f'ваш новый пароль {new_pass}'
+        send_mail(
+            'Смена пароля',
+            message,
+            'sultanov0807@gmail.com',
+            [email]
+        )

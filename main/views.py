@@ -21,7 +21,7 @@ class CategoryListView(generics.ListAPIView): #листинк категории
 class PostsViewSet(viewsets.ModelViewSet):  #CRAD
     queryset = Post.objects.all()
     serializer_class = PostSerializer
-    permission_classes = [IsAuthenticated, ] #посты могуть смотреть только те кто авторизован
+    permission_classes = [IsAuthenticated, ]
 
     def get_serializer_context(self):
         return {'request': self.request}
@@ -29,7 +29,7 @@ class PostsViewSet(viewsets.ModelViewSet):  #CRAD
     def get_permissions(self): #любой аутентифицированный пользователь мог смотреть посты
         if self.action in ['update', 'partial_update', 'destroy']:
             permissions = [IsPostAuthor, ]
-        elif self.action in ['comment', 'like', 'rating']:
+        elif self.action in ['comment', 'like']:
             permissions = [IsAuthenticated, ]
         else:
             permissions = []
@@ -101,6 +101,7 @@ class PostsViewSet(viewsets.ModelViewSet):  #CRAD
 class PImageView(generics.ListCreateAPIView): #листинк картинки
     queryset = PImage.objects.all()
     serializer_class = PImageSerializer
+    permission_classes = [IsAuthenticated, ]
 
     def get_serializer_context(self):
         return {'request': self.request}
